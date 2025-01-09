@@ -1,17 +1,18 @@
-import * as Carousel from "./Carousel.js";
-import axios from "axios";
+import * as Carousel from './Carousel.js';
+// You have axios, you don't need to import it
+console.log(axios);
 
 // The breed selection input element.
-const breedSelect = document.getElementById("breedSelect");
+const breedSelect = document.getElementById('breedSelect');
 // The information section div element.
-const infoDump = document.getElementById("infoDump");
+const infoDump = document.getElementById('infoDump');
 // The progress bar div element.
-const progressBar = document.getElementById("progressBar");
+const progressBar = document.getElementById('progressBar');
 // The get favourites button element.
-const getFavouritesBtn = document.getElementById("getFavouritesBtn");
+const getFavouritesBtn = document.getElementById('getFavouritesBtn');
 
 // Step 0: Store your API key here for reference and easy access.
-const API_KEY = "";
+const API_KEY = "live_289lU4RWiIZ6xmZ1FG8GgobI6mHJBPz5T8VGcrWzb14GPTfbvwXC1DaYBzaFQMQ6";
 
 /**
  * 1. Create an async function "initialLoad" that does the following:
@@ -21,7 +22,25 @@ const API_KEY = "";
  *  - Each option should display text equal to the name of the breed.
  * This function should execute immediately.
  */
+initialLoad();
 
+async function initialLoad() {
+  try{
+  const response = await fetch("https://api.thecatapi.com/v1/breeds"); //.then((response)=>response.json());
+  const data = await response.json();
+  console.log(data);
+  data.forEach((item) => {
+    const optionsEl = document.createElement("option");
+    // optionsEl.setAttribute("value",item.id);--another way to assign item.id to value
+    optionsEl.value = item.id;
+    optionsEl.textContent = item.name;
+    breedSelect.appendChild(optionsEl);
+  });
+}
+catch(err){
+  console.log(err);
+}
+}
 /**
  * 2. Create an event handler for breedSelect that does the following:
  * - Retrieve information on the selected breed from the cat API using fetch().
@@ -36,7 +55,32 @@ const API_KEY = "";
  * - Each new selection should clear, re-populate, and restart the Carousel.
  * - Add a call to this function to the end of your initialLoad function above to create the initial carousel.
  */
+async function loadCatValue(catID) {
+  // const response = await fetch("https://api.thecatapi.com/v1/breeds/" + catID);
+  // const catDetails = await response.json();
+  const catImageDetails = await getCatImgUrl(catID);
+  console.log("Cat_Count::"+catImageDetails.length);
+  if (catImageDetails && catImageDetails.length > 0) {
+    console.log("results::" + catImageDetails[0].id);
+    const carouselItem = Carousel.createCarouselItem(catImageDetails[0].url,"",catImageDetails[0].id);
+    Carousel.appendCarousel(carouselItem);
+    Carousel.start();
+  }
+  //console.log(catDetails);
+}
 
+async function getCatImgUrl(catName) {
+  const response = await fetch(
+    "https://api.thecatapi.com/v1/images/search?breed_ids=" + catName
+  );
+  return await response.json();
+}
+
+breedSelect.addEventListener("change", () => {
+  const optionValue = document.querySelector("option");
+  console.log(optionValue.value);
+  loadCatValue(optionValue.value);
+});
 /**
  * 3. Fork your own sandbox, creating a new one named "JavaScript Axios Lab."
  */
