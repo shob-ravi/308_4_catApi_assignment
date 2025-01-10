@@ -22,51 +22,67 @@ const API_KEY = "live_289lU4RWiIZ6xmZ1FG8GgobI6mHJBPz5T8VGcrWzb14GPTfbvwXC1DaYBz
  *  - Each option should display text equal to the name of the breed.
  * This function should execute immediately.
  */
-initialLoad();
+var breedinfo = [];
+//document.addEventListener("DOMContentLoaded", ()=>{
 
-async function initialLoad() {
-  try{
-  const response = await fetch("https://api.thecatapi.com/v1/breeds"); //.then((response)=>response.json());
-  const data = await response.json();
-  console.log(data);
-  data.forEach((item) => {
-    const optionsEl = document.createElement("option");
-    // optionsEl.setAttribute("value",item.id);--another way to assign item.id to value
-    optionsEl.value = item.id;
-    optionsEl.textContent = item.name;
-    breedSelect.appendChild(optionsEl);
+  initialLoad();
+
+  async function initialLoad() {
+    try{
+    const response = await fetch("https://api.thecatapi.com/v1/breeds"); //.then((response)=>response.json());
+    const data = breedinfo =  await response.json();
+    data.forEach((item) => {
+      const option = document.createElement("option");
+      // optionsEl.setAttribute("value",item.id);--another way to assign item.id to value
+      option.value = item.id;
+      option.textContent = item.name;
+      breedSelect.appendChild(option);
+    });
+  }
+  catch(err){
+    console.log(err);
+  }
+  }
+  
+//})
+
+
+  /**
+   * 2. Create an event handler for breedSelect that does the following:
+   * - Retrieve information on the selected breed from the cat API using fetch().
+   *  - Make sure your request is receiving multiple array items!
+   *  - Check the API documentation if you're only getting a single object.
+   * - For each object in the response array, create a new element for the carousel.
+   *  - Append each of these new elements to the carousel.
+   * - Use the other data you have been given to create an informational section within the infoDump element.
+   *  - Be creative with how you create DOM elements and HTML.
+   *  - Feel free to edit index.html and styles.css to suit your needs, but be careful!
+   *  - Remember that functionality comes first, but user experience and design are important.
+   * - Each new selection should clear, re-populate, and restart the Carousel.
+   * - Add a call to this function to the end of your initialLoad function above to create the initial carousel.
+   */
+  console.log("breedSelect::::"+JSON.stringify(breedSelect));
+  breedSelect.addEventListener("change", () => {
+    const optionValue = breedSelect.value;
+    loadCatValue(optionValue);  
   });
-}
-catch(err){
-  console.log(err);
-}
-}
-/**
- * 2. Create an event handler for breedSelect that does the following:
- * - Retrieve information on the selected breed from the cat API using fetch().
- *  - Make sure your request is receiving multiple array items!
- *  - Check the API documentation if you're only getting a single object.
- * - For each object in the response array, create a new element for the carousel.
- *  - Append each of these new elements to the carousel.
- * - Use the other data you have been given to create an informational section within the infoDump element.
- *  - Be creative with how you create DOM elements and HTML.
- *  - Feel free to edit index.html and styles.css to suit your needs, but be careful!
- *  - Remember that functionality comes first, but user experience and design are important.
- * - Each new selection should clear, re-populate, and restart the Carousel.
- * - Add a call to this function to the end of your initialLoad function above to create the initial carousel.
- */
+  
 async function loadCatValue(catID) {
-  // const response = await fetch("https://api.thecatapi.com/v1/breeds/" + catID);
-  // const catDetails = await response.json();
   const catImageDetails = await getCatImgUrl(catID);
-  console.log("Cat_Count::"+catImageDetails.length);
+  console.log("Cat_Count::"+catImageDetails);
   if (catImageDetails && catImageDetails.length > 0) {
     console.log("results::" + catImageDetails[0].id);
     const carouselItem = Carousel.createCarouselItem(catImageDetails[0].url,"",catImageDetails[0].id);
     Carousel.appendCarousel(carouselItem);
     Carousel.start();
+    const breed = breedinfo.find(a=>a.id===catID);
+    loadInfo(breed);
   }
-  //console.log(catDetails);
+}
+function loadInfo(breedInfo){
+  infoDump.innerHTML = `
+  <h2>${breedInfo.name}</h2>
+  <p>${breedInfo.description}</p>`;
 }
 
 async function getCatImgUrl(catName) {
@@ -76,11 +92,6 @@ async function getCatImgUrl(catName) {
   return await response.json();
 }
 
-breedSelect.addEventListener("change", () => {
-  const optionValue = document.querySelector("option");
-  console.log(optionValue.value);
-  loadCatValue(optionValue.value);
-});
 /**
  * 3. Fork your own sandbox, creating a new one named "JavaScript Axios Lab."
  */
